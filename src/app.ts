@@ -2,6 +2,8 @@ import express, { Express } from 'express';
 import { DeviceController } from './controllers/device-controller';
 import { DeviceService } from './services/device-service';
 import { InMemoryDeviceRepository } from './repositories/in-memory-device-repository';
+import { DeviceRoutes } from './routes/device-routes';
+import { swaggerUiServe, swaggerUiSetup } from './swagger';
 
 export class App {
   public app: Express;
@@ -16,15 +18,10 @@ export class App {
 
   private config(): void {
     this.app.use(express.json());
+    this.app.use('/api-docs', swaggerUiServe, swaggerUiSetup);
   }
 
   private routes(): void {
-    this.app.post('/devices', (req, res) => this.deviceController.createDevice(req, res));
-    this.app.put('/devices/:id', (req, res) => this.deviceController.updateDevice(req, res));
-    this.app.get('/devices/:id', (req, res) => this.deviceController.getDevice(req, res));
-    this.app.get('/devices', (req, res) => this.deviceController.getAllDevices(req, res));
-    this.app.get('/devices/brand/:brand', (req, res) => this.deviceController.getDevicesByBrand(req, res));
-    this.app.get('/devices/state/:state', (req, res) => this.deviceController.getDevicesByState(req, res));
-    this.app.delete('/devices/:id', (req, res) => this.deviceController.deleteDevice(req, res));
+    this.app.use('/devices', new DeviceRoutes(this.deviceController).router); 
   }
 }
